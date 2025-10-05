@@ -80,10 +80,48 @@ export default {
             height: "0",
           },
         },
+        "card-deal": {
+          "0%": {
+            transform: "translateY(-100%) scale(0.5) rotate(-10deg)",
+            opacity: "0",
+          },
+          "100%": {
+            transform: "translateY(0) scale(1) rotate(0deg)",
+            opacity: "1",
+          },
+        },
+        "card-flip": {
+          "0%": {
+            transform: "rotateY(0deg)",
+          },
+          "100%": {
+            transform: "rotateY(180deg)",
+          },
+        },
+        "card-hover": {
+          "0%": {
+            transform: "translateY(0)",
+          },
+          "100%": {
+            transform: "translateY(-20px)",
+          },
+        },
+        "pulse-glow": {
+          "0%, 100%": {
+            boxShadow: "0 0 20px rgba(66, 184, 131, 0.5)",
+          },
+          "50%": {
+            boxShadow: "0 0 40px rgba(66, 184, 131, 0.8)",
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "card-deal": "card-deal 0.5s ease-out",
+        "card-flip": "card-flip 0.6s ease-in-out",
+        "card-hover": "card-hover 0.2s ease-out",
+        "pulse-glow": "pulse-glow 2s ease-in-out infinite",
       },
     },
   },

@@ -1,0 +1,94 @@
+import { Card, CardColor, CardValue } from "./Card";
+import { PlayerHand } from "./PlayerHand";
+
+interface GameTableProps {
+  currentPlayer: { color: CardColor; value: CardValue }[];
+  topPlayer: { color: CardColor; value: CardValue }[];
+  leftPlayer: { color: CardColor; value: CardValue }[];
+  rightPlayer: { color: CardColor; value: CardValue }[];
+  discardPile: { color: CardColor; value: CardValue };
+}
+
+export const GameTable = ({
+  currentPlayer,
+  topPlayer,
+  leftPlayer,
+  rightPlayer,
+  discardPile,
+}: GameTableProps) => {
+  return (
+    <div className="relative w-full h-screen overflow-hidden">
+      {/* Table background with felt texture effect */}
+      <div className="absolute inset-0 bg-gradient-to-br from-[hsl(var(--table-felt))] via-[hsl(var(--table-felt-dark))] to-[hsl(var(--table-felt))]">
+        <div className="absolute inset-0 opacity-20">
+          <div className="absolute inset-0" style={{
+            backgroundImage: "repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0,0,0,.1) 10px, rgba(0,0,0,.1) 20px)",
+          }}></div>
+        </div>
+      </div>
+
+      {/* Game area */}
+      <div className="relative w-full h-full flex items-center justify-center p-8">
+        {/* Top player */}
+        <div className="absolute top-8 left-1/2 transform -translate-x-1/2">
+          <PlayerHand cards={topPlayer} position="top" playerName="Player 2" />
+        </div>
+
+        {/* Left player */}
+        <div className="absolute left-8 top-1/2 transform -translate-y-1/2">
+          <PlayerHand cards={leftPlayer} position="left" playerName="Player 3" />
+        </div>
+
+        {/* Right player */}
+        <div className="absolute right-8 top-1/2 transform -translate-y-1/2">
+          <PlayerHand cards={rightPlayer} position="right" playerName="Player 4" />
+        </div>
+
+        {/* Center play area */}
+        <div className="flex items-center gap-8">
+          {/* Draw pile */}
+          <div className="relative">
+            <div className="text-foreground/80 text-sm font-semibold mb-2 text-center">
+              Draw Pile
+            </div>
+            <div className="relative">
+              {[...Array(3)].map((_, i) => (
+                <Card
+                  key={i}
+                  isFlipped={true}
+                  className="absolute top-0 left-0"
+                  style={{
+                    transform: `translate(${i * 2}px, ${i * 2}px)`,
+                  }}
+                />
+              ))}
+              <Card isFlipped={true} className="relative animate-pulse-glow" />
+            </div>
+          </div>
+
+          {/* Discard pile */}
+          <div className="relative">
+            <div className="text-foreground/80 text-sm font-semibold mb-2 text-center">
+              Discard Pile
+            </div>
+            <Card
+              color={discardPile.color}
+              value={discardPile.value}
+              className="transform scale-110 shadow-2xl"
+            />
+          </div>
+        </div>
+
+        {/* Current player (bottom) */}
+        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
+          <PlayerHand cards={currentPlayer} isCurrentPlayer={true} />
+        </div>
+      </div>
+
+      {/* Game info overlay */}
+      <div className="absolute top-4 right-4 bg-background/30 backdrop-blur-md rounded-lg px-4 py-2 shadow-lg">
+        <div className="text-foreground font-semibold">Turn: You</div>
+      </div>
+    </div>
+  );
+};
