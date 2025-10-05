@@ -1,3 +1,5 @@
+import { useState } from "react";
+import { motion } from "framer-motion";
 import { Card, CardColor, CardValue } from "./Card";
 import { PlayerHand } from "./PlayerHand";
 
@@ -7,6 +9,7 @@ interface GameTableProps {
   leftPlayer: { color: CardColor; value: CardValue }[];
   rightPlayer: { color: CardColor; value: CardValue }[];
   discardPile: { color: CardColor; value: CardValue };
+  onDrawCard?: () => void;
 }
 
 export const GameTable = ({
@@ -15,7 +18,15 @@ export const GameTable = ({
   leftPlayer,
   rightPlayer,
   discardPile,
+  onDrawCard,
 }: GameTableProps) => {
+  const [isDrawPileHovered, setIsDrawPileHovered] = useState(false);
+  
+  const handleCardPlay = (playerIndex: number, cardIndex: number) => {
+    console.log(`Player ${playerIndex} played card ${cardIndex}`);
+    // This would trigger game logic to play the card
+  };
+
   return (
     <div className="relative w-full h-screen overflow-hidden">
       {/* Table background with felt texture effect */}
@@ -31,17 +42,29 @@ export const GameTable = ({
       <div className="relative w-full h-full flex items-center justify-center p-8">
         {/* Top player */}
         <div className="absolute top-8 left-1/2 transform -translate-x-1/2">
-          <PlayerHand cards={topPlayer} position="top" playerName="Player 2" />
+          <PlayerHand 
+            cards={topPlayer} 
+            position="top" 
+            playerName="Player 2" 
+          />
         </div>
 
         {/* Left player */}
         <div className="absolute left-8 top-1/2 transform -translate-y-1/2">
-          <PlayerHand cards={leftPlayer} position="left" playerName="Player 3" />
+          <PlayerHand 
+            cards={leftPlayer} 
+            position="left" 
+            playerName="Player 3" 
+          />
         </div>
 
         {/* Right player */}
         <div className="absolute right-8 top-1/2 transform -translate-y-1/2">
-          <PlayerHand cards={rightPlayer} position="right" playerName="Player 4" />
+          <PlayerHand 
+            cards={rightPlayer} 
+            position="right" 
+            playerName="Player 4" 
+          />
         </div>
 
         {/* Center play area */}
@@ -51,19 +74,39 @@ export const GameTable = ({
             <div className="text-foreground/80 text-sm font-semibold mb-2 text-center">
               Draw Pile
             </div>
-            <div className="relative">
+            <motion.div 
+              className="relative cursor-pointer"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={onDrawCard}
+              onMouseEnter={() => setIsDrawPileHovered(true)}
+              onMouseLeave={() => setIsDrawPileHovered(false)}
+            >
               {[...Array(3)].map((_, i) => (
-                <Card
+                <div
                   key={i}
-                  isFlipped={true}
                   className="absolute top-0 left-0"
                   style={{
                     transform: `translate(${i * 2}px, ${i * 2}px)`,
+                    zIndex: i
                   }}
-                />
+                >
+                  <Card
+                    isFlipped={true}
+                  />
+                </div>
               ))}
-              <Card isFlipped={true} className="relative animate-pulse-glow" />
-            </div>
+              <motion.div
+                animate={isDrawPileHovered ? {
+                  boxShadow: "0 0 30px rgba(66, 184, 131, 0.6)"
+                } : {
+                  boxShadow: "0 0 20px rgba(66, 184, 131, 0.3)"
+                }}
+                transition={{ duration: 0.3 }}
+              >
+                <Card isFlipped={true} />
+              </motion.div>
+            </motion.div>
           </div>
 
           {/* Discard pile */}
@@ -71,17 +114,27 @@ export const GameTable = ({
             <div className="text-foreground/80 text-sm font-semibold mb-2 text-center">
               Discard Pile
             </div>
-            <Card
-              color={discardPile.color}
-              value={discardPile.value}
-              className="transform scale-110 shadow-2xl"
-            />
+            <motion.div
+              initial={{ scale: 1, rotate: 0 }}
+              animate={{ scale: 1.1, rotate: 2 }}
+              transition={{ duration: 0.3 }}
+            >
+              <Card
+                color={discardPile.color}
+                value={discardPile.value}
+                className="shadow-2xl"
+              />
+            </motion.div>
           </div>
         </div>
 
         {/* Current player (bottom) */}
         <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
-          <PlayerHand cards={currentPlayer} isCurrentPlayer={true} />
+          <PlayerHand 
+            cards={currentPlayer} 
+            isCurrentPlayer={true}
+            onCardPlay={(cardIndex) => handleCardPlay(0, cardIndex)}
+          />
         </div>
       </div>
 

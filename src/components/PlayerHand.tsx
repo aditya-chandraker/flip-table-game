@@ -5,6 +5,7 @@ interface PlayerHandProps {
   isCurrentPlayer?: boolean;
   position?: "bottom" | "top" | "left" | "right";
   playerName?: string;
+  onCardPlay?: (index: number) => void;
 }
 
 export const PlayerHand = ({
@@ -12,12 +13,55 @@ export const PlayerHand = ({
   isCurrentPlayer = false,
   position = "bottom",
   playerName = "Player",
+  onCardPlay,
 }: PlayerHandProps) => {
-  const positionClasses = {
-    bottom: "flex-row justify-center",
-    top: "flex-row justify-center",
-    left: "flex-col items-start",
-    right: "flex-col items-end",
+  // Calculate natural card fanning
+  const calculateCardTransform = (index: number, total: number) => {
+    const centerIndex = (total - 1) / 2;
+    const offset = index - centerIndex;
+    
+    if (isCurrentPlayer && position === "bottom") {
+      // Natural fan effect with rotation and vertical arc
+      const rotation = offset * 4; // degrees
+      const horizontalOffset = offset * 35; // pixels
+      const verticalOffset = Math.abs(offset) * 8; // arc effect
+      
+      return {
+        x: horizontalOffset,
+        y: verticalOffset,
+        rotation: rotation,
+        zIndex: index
+      };
+    } else if (position === "top") {
+      // Top player - slight fan
+      const rotation = offset * 3;
+      const horizontalOffset = offset * 30;
+      return {
+        x: horizontalOffset,
+        y: 0,
+        rotation: rotation,
+        zIndex: index
+      };
+    } else if (position === "left" || position === "right") {
+      // Side players - vertical fan
+      const rotation = offset * 3;
+      const verticalOffset = offset * 25;
+      return {
+        x: 0,
+        y: verticalOffset,
+        rotation: rotation,
+        zIndex: index
+      };
+    }
+    
+    return { x: 0, y: 0, rotation: 0, zIndex: index };
+  };
+
+  const handleCardDragEnd = (index: number) => (event: any, info: any) => {
+    // If dragged upwards significantly, play the card
+    if (info.offset.y < -50 && isCurrentPlayer) {
+      onCardPlay?.(index);
+    }
   };
 
   return (
@@ -27,26 +71,35 @@ export const PlayerHand = ({
           {playerName}
         </div>
       )}
-      <div className={`flex gap-2 ${positionClasses[position]}`}>
-        {cards.map((card, index) => (
-          <div
-            key={index}
-            className="transition-transform"
-            style={{
-              transform: isCurrentPlayer
-                ? `translateX(${(index - cards.length / 2) * 2}px)`
-                : "none",
-            }}
-          >
-            <Card
-              color={card.color}
-              value={card.value}
-              isFlipped={!isCurrentPlayer}
-              isHoverable={isCurrentPlayer}
-              delay={index * 100}
-            />
-          </div>
-        ))}
+      <div className="relative" style={{ height: isCurrentPlayer ? "140px" : "130px", width: `${cards.length * 40}px`, minWidth: "200px" }}>
+        {cards.map((card, index) => {
+          const transform = calculateCardTransform(index, cards.length);
+          return (
+            <div
+              key={index}
+              className="absolute"
+              style={{
+                left: isCurrentPlayer ? `${index * 35}px` : `${index * 30}px`,
+                top: 0,
+                zIndex: transform.zIndex
+              }}
+            >
+              <Card
+                color={card.color}
+                value={card.value}
+                isFlipped={!isCurrentPlayer}
+                isHoverable={isCurrentPlayer}
+                onDragEnd={handleCardDragEnd(index)}
+                delay={index * 100}
+                index={index}
+                rotation={transform.rotation}
+                style={{
+                  transform: `translateX(${transform.x}px) translateY(${transform.y}px)`
+                }}
+              />
+            </div>
+          );
+        })}
       </div>
       {isCurrentPlayer && (
         <div className="text-foreground font-semibold text-sm bg-background/20 px-3 py-1 rounded-full backdrop-blur-sm">
