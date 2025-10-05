@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Card, CardColor, CardValue } from "./Card";
 import { PlayerHand } from "./PlayerHand";
+import { Clock } from "lucide-react";
 
 interface GameTableProps {
   currentPlayer: { color: CardColor; value: CardValue }[];
@@ -21,6 +22,18 @@ export const GameTable = ({
   onDrawCard,
 }: GameTableProps) => {
   const [isDrawPileHovered, setIsDrawPileHovered] = useState(false);
+  const [turnTimer, setTurnTimer] = useState(30);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTurnTimer((prev) => {
+        if (prev <= 1) return 30; // Reset timer
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
   
   const handleCardPlay = (playerIndex: number, cardIndex: number) => {
     console.log(`Player ${playerIndex} played card ${cardIndex}`);
@@ -71,10 +84,7 @@ export const GameTable = ({
         <div className="flex items-center gap-8">
           {/* Draw pile */}
           <div className="relative">
-            <div className="text-foreground/80 text-sm font-semibold mb-2 text-center">
-              Draw Pile
-            </div>
-            <motion.div 
+            <motion.div
               className="relative cursor-pointer"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -111,9 +121,6 @@ export const GameTable = ({
 
           {/* Discard pile */}
           <div className="relative">
-            <div className="text-foreground/80 text-sm font-semibold mb-2 text-center">
-              Discard Pile
-            </div>
             <motion.div
               initial={{ scale: 1, rotate: 0 }}
               animate={{ scale: 1.1, rotate: 2 }}
@@ -138,9 +145,26 @@ export const GameTable = ({
         </div>
       </div>
 
-      {/* Game info overlay */}
-      <div className="absolute top-4 right-4 bg-background/30 backdrop-blur-md rounded-lg px-4 py-2 shadow-lg">
-        <div className="text-foreground font-semibold">Turn: You</div>
+      {/* Turn timer overlay */}
+      <div className="absolute top-4 right-4 bg-background/20 backdrop-blur-md rounded-lg px-4 py-3 shadow-lg border-2 border-primary/30">
+        <div className="flex items-center gap-3">
+          <div className="flex flex-col items-center">
+            <div className="text-foreground/70 text-xs font-medium mb-1">Your Turn</div>
+            <div className="flex items-center gap-2">
+              <Clock className="w-4 h-4 text-primary" />
+              <motion.div
+                className="text-2xl font-bold"
+                animate={{
+                  color: turnTimer <= 10 ? "hsl(var(--destructive))" : "hsl(var(--primary))",
+                  scale: turnTimer <= 10 && turnTimer % 2 === 0 ? 1.1 : 1,
+                }}
+                transition={{ duration: 0.2 }}
+              >
+                {turnTimer}s
+              </motion.div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -42,12 +42,24 @@ export const PlayerHand = ({
         rotation: rotation,
         zIndex: index
       };
-    } else if (position === "left" || position === "right") {
-      // Side players - vertical fan
-      const rotation = offset * 3;
-      const verticalOffset = offset * 25;
+    } else if (position === "left") {
+      // Left player - vertical fan rotated 90deg
+      const rotation = 90 + (offset * 4); // Base 90deg + fan effect
+      const verticalOffset = offset * 30;
+      const horizontalOffset = Math.abs(offset) * 5; // Arc effect
       return {
-        x: 0,
+        x: horizontalOffset,
+        y: verticalOffset,
+        rotation: rotation,
+        zIndex: index
+      };
+    } else if (position === "right") {
+      // Right player - vertical fan rotated -90deg
+      const rotation = -90 + (offset * 4); // Base -90deg + fan effect
+      const verticalOffset = offset * 30;
+      const horizontalOffset = -Math.abs(offset) * 5; // Arc effect
+      return {
+        x: horizontalOffset,
         y: verticalOffset,
         rotation: rotation,
         zIndex: index
