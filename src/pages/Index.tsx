@@ -30,6 +30,20 @@ const Index = () => {
     });
   };
 
+  const handleCardPlay = (cardIndex: number) => {
+    // Remove the played card from hand
+    const newCards = currentPlayerCards.filter((_, i) => i !== cardIndex);
+    setCurrentPlayerCards(newCards);
+    
+    toast({
+      title: "Card Played!",
+      description: "Your card was played to the discard pile",
+    });
+    
+    // Move to next player
+    setCurrentTurn((prev) => (prev + 1) % 4);
+  };
+
   const handleTurnEnd = () => {
     // If it's the player's turn and they didn't play, auto-draw
     if (currentTurn === 0) {
@@ -93,6 +107,7 @@ const Index = () => {
       rightPlayer={rightPlayerCards}
       discardPile={discardPile}
       onDrawCard={handleDrawCard}
+      onCardPlay={handleCardPlay}
       currentTurn={currentTurn}
       onTurnEnd={handleTurnEnd}
     />
