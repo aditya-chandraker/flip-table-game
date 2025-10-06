@@ -11,9 +11,6 @@ interface GameTableProps {
   rightPlayer: { color: CardColor; value: CardValue }[];
   discardPile: { color: CardColor; value: CardValue };
   onDrawCard?: () => void;
-  onCardPlay?: (cardIndex: number) => void;
-  currentTurn: number;
-  onTurnEnd?: () => void;
 }
 
 export const GameTable = ({
@@ -23,34 +20,24 @@ export const GameTable = ({
   rightPlayer,
   discardPile,
   onDrawCard,
-  onCardPlay,
-  currentTurn,
-  onTurnEnd,
 }: GameTableProps) => {
   const [isDrawPileHovered, setIsDrawPileHovered] = useState(false);
   const [turnTimer, setTurnTimer] = useState(30);
 
   useEffect(() => {
-    setTurnTimer(30); // Reset timer when turn changes
-  }, [currentTurn]);
-
-  useEffect(() => {
     const interval = setInterval(() => {
       setTurnTimer((prev) => {
-        if (prev <= 1) {
-          onTurnEnd?.();
-          return 30;
-        }
+        if (prev <= 1) return 30; // Reset timer
         return prev - 1;
       });
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [onTurnEnd]);
+  }, []);
   
-  const handleCardPlayInternal = (cardIndex: number) => {
-    onCardPlay?.(cardIndex);
-    setTurnTimer(30);
+  const handleCardPlay = (playerIndex: number, cardIndex: number) => {
+    console.log(`Player ${playerIndex} played card ${cardIndex}`);
+    // This would trigger game logic to play the card
   };
 
   return (
@@ -67,52 +54,31 @@ export const GameTable = ({
       {/* Game area */}
       <div className="relative w-full h-full flex items-center justify-center p-8">
         {/* Top player */}
-        <motion.div 
-          className="absolute top-8 left-1/2 transform -translate-x-1/2"
-          animate={{
-            filter: currentTurn === 1 ? "drop-shadow(0 0 20px rgba(66, 184, 131, 0.6))" : "none",
-          }}
-          transition={{ duration: 0.3 }}
-        >
+        <div className="absolute top-8 left-1/2 transform -translate-x-1/2">
           <PlayerHand 
             cards={topPlayer} 
             position="top" 
-            playerName="Player 2"
-            isActivePlayer={currentTurn === 1}
+            playerName="Player 2" 
           />
-        </motion.div>
+        </div>
 
         {/* Left player */}
-        <motion.div 
-          className="absolute left-8 top-1/2 transform -translate-y-1/2"
-          animate={{
-            filter: currentTurn === 2 ? "drop-shadow(0 0 20px rgba(66, 184, 131, 0.6))" : "none",
-          }}
-          transition={{ duration: 0.3 }}
-        >
+        <div className="absolute left-8 top-1/2 transform -translate-y-1/2">
           <PlayerHand 
             cards={leftPlayer} 
             position="left" 
-            playerName="Player 3"
-            isActivePlayer={currentTurn === 2}
+            playerName="Player 3" 
           />
-        </motion.div>
+        </div>
 
         {/* Right player */}
-        <motion.div 
-          className="absolute right-8 top-1/2 transform -translate-y-1/2"
-          animate={{
-            filter: currentTurn === 3 ? "drop-shadow(0 0 20px rgba(66, 184, 131, 0.6))" : "none",
-          }}
-          transition={{ duration: 0.3 }}
-        >
+        <div className="absolute right-8 top-1/2 transform -translate-y-1/2">
           <PlayerHand 
             cards={rightPlayer} 
             position="right" 
-            playerName="Player 4"
-            isActivePlayer={currentTurn === 3}
+            playerName="Player 4" 
           />
-        </motion.div>
+        </div>
 
         {/* Center play area */}
         <div className="flex items-center gap-8">
@@ -170,29 +136,20 @@ export const GameTable = ({
         </div>
 
         {/* Current player (bottom) */}
-        <motion.div 
-          className="absolute bottom-8 left-1/2 transform -translate-x-1/2"
-          animate={{
-            filter: currentTurn === 0 ? "drop-shadow(0 0 20px rgba(66, 184, 131, 0.6))" : "none",
-          }}
-          transition={{ duration: 0.3 }}
-        >
+        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
           <PlayerHand 
             cards={currentPlayer} 
             isCurrentPlayer={true}
-            onCardPlay={handleCardPlayInternal}
-            isActivePlayer={currentTurn === 0}
+            onCardPlay={(cardIndex) => handleCardPlay(0, cardIndex)}
           />
-        </motion.div>
+        </div>
       </div>
 
       {/* Turn timer overlay */}
       <div className="absolute top-4 right-4 bg-background/20 backdrop-blur-md rounded-lg px-4 py-3 shadow-lg border-2 border-primary/30">
         <div className="flex items-center gap-3">
           <div className="flex flex-col items-center">
-            <div className="text-foreground/70 text-xs font-medium mb-1">
-              {currentTurn === 0 ? "Your Turn" : `Player ${currentTurn + 1}'s Turn`}
-            </div>
+            <div className="text-foreground/70 text-xs font-medium mb-1">Your Turn</div>
             <div className="flex items-center gap-2">
               <Clock className="w-4 h-4 text-primary" />
               <motion.div

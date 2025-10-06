@@ -1,5 +1,4 @@
 import { Card, CardColor, CardValue } from "./Card";
-import { cn } from "@/lib/utils";
 
 interface PlayerHandProps {
   cards: { color: CardColor; value: CardValue }[];
@@ -7,7 +6,6 @@ interface PlayerHandProps {
   position?: "bottom" | "top" | "left" | "right";
   playerName?: string;
   onCardPlay?: (index: number) => void;
-  isActivePlayer?: boolean;
 }
 
 export const PlayerHand = ({
@@ -16,7 +14,6 @@ export const PlayerHand = ({
   position = "bottom",
   playerName = "Player",
   onCardPlay,
-  isActivePlayer = false,
 }: PlayerHandProps) => {
   // Calculate natural card fanning
   const calculateCardTransform = (index: number, total: number) => {
@@ -46,10 +43,10 @@ export const PlayerHand = ({
         zIndex: index
       };
     } else if (position === "left") {
-      // Left player - cards held vertically, fanned out like holding in hand
-      const rotation = 90 + (offset * 8); // More pronounced fan effect
-      const verticalOffset = offset * 25; // Vertical spread
-      const horizontalOffset = Math.abs(offset) * 12; // Arc depth toward center
+      // Left player - vertical fan rotated 90deg
+      const rotation = 90 + (offset * 4); // Base 90deg + fan effect
+      const verticalOffset = offset * 30;
+      const horizontalOffset = Math.abs(offset) * 5; // Arc effect
       return {
         x: horizontalOffset,
         y: verticalOffset,
@@ -57,10 +54,10 @@ export const PlayerHand = ({
         zIndex: index
       };
     } else if (position === "right") {
-      // Right player - cards held vertically, fanned out like holding in hand
-      const rotation = -90 + (offset * 8); // More pronounced fan effect
-      const verticalOffset = offset * 25; // Vertical spread
-      const horizontalOffset = -Math.abs(offset) * 12; // Arc depth toward center
+      // Right player - vertical fan rotated -90deg
+      const rotation = -90 + (offset * 4); // Base -90deg + fan effect
+      const verticalOffset = offset * 30;
+      const horizontalOffset = -Math.abs(offset) * 5; // Arc effect
       return {
         x: horizontalOffset,
         y: verticalOffset,
@@ -82,10 +79,7 @@ export const PlayerHand = ({
   return (
     <div className="flex flex-col items-center gap-2">
       {!isCurrentPlayer && (
-        <div className={cn(
-          "text-foreground font-semibold text-sm px-3 py-1 rounded-full backdrop-blur-sm transition-all",
-          isActivePlayer ? "bg-primary/40 ring-2 ring-primary shadow-lg" : "bg-background/20"
-        )}>
+        <div className="text-foreground font-semibold text-sm bg-background/20 px-3 py-1 rounded-full backdrop-blur-sm">
           {playerName}
         </div>
       )}
@@ -106,15 +100,13 @@ export const PlayerHand = ({
                 color={card.color}
                 value={card.value}
                 isFlipped={!isCurrentPlayer}
-                isHoverable={isCurrentPlayer && isActivePlayer}
+                isHoverable={isCurrentPlayer}
                 onDragEnd={handleCardDragEnd(index)}
                 delay={index * 100}
                 index={index}
                 rotation={transform.rotation}
                 style={{
-                  transform: `translateX(${transform.x}px) translateY(${transform.y}px)`,
-                  opacity: isCurrentPlayer && !isActivePlayer ? 0.5 : 1,
-                  pointerEvents: isCurrentPlayer && !isActivePlayer ? 'none' : 'auto'
+                  transform: `translateX(${transform.x}px) translateY(${transform.y}px)`
                 }}
               />
             </div>
@@ -122,10 +114,7 @@ export const PlayerHand = ({
         })}
       </div>
       {isCurrentPlayer && (
-        <div className={cn(
-          "text-foreground font-semibold text-sm px-3 py-1 rounded-full backdrop-blur-sm transition-all",
-          isActivePlayer ? "bg-primary/40 ring-2 ring-primary shadow-lg" : "bg-background/20"
-        )}>
+        <div className="text-foreground font-semibold text-sm bg-background/20 px-3 py-1 rounded-full backdrop-blur-sm">
           You
         </div>
       )}
