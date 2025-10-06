@@ -3,8 +3,8 @@ import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { SkipForward, RotateCcw, Plus, Palette } from "lucide-react";
 
-export type CardColor = "red" | "blue" | "yellow" | "green";
-export type CardValue = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "skip" | "reverse" | "draw2" | "wild" | "wild-draw4";
+export type CardColor = "red" | "blue" | "yellow" | "green" | "dark";
+export type CardValue = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "skip" | "reverse" | "draw2" | "wild" | "wild-draw4" | "flip" | "draw5" | "skip-all" | "wild-draw-color";
 
 interface CardProps {
   color?: CardColor;
@@ -25,6 +25,7 @@ const colorClasses: Record<CardColor, string> = {
   blue: "bg-gradient-to-br from-blue-500 to-blue-600",
   yellow: "bg-gradient-to-br from-yellow-400 to-yellow-500",
   green: "bg-gradient-to-br from-green-500 to-green-600",
+  dark: "bg-gradient-to-br from-purple-700 via-indigo-700 to-purple-800",
 };
 
 const getCardIcon = (value: CardValue) => {
@@ -52,8 +53,61 @@ const getCardIcon = (value: CardValue) => {
           </div>
         </div>
       );
+    case "flip":
+      return (
+        <div className="flex flex-col items-center">
+          <RotateCcw className="w-6 h-6" />
+          <span className="text-sm font-bold">FLIP</span>
+        </div>
+      );
+    case "draw5":
+      return (
+        <div className="flex items-center gap-1">
+          <Plus className="w-6 h-6" />
+          <span className="text-2xl font-bold">5</span>
+        </div>
+      );
+    case "skip-all":
+      return (
+        <div className="flex flex-col items-center">
+          <SkipForward className="w-6 h-6" />
+          <span className="text-sm font-bold">ALL</span>
+        </div>
+      );
+    case "wild-draw-color":
+      return (
+        <div className="flex flex-col items-center gap-1">
+          <Palette className="w-5 h-5" />
+          <span className="text-xs font-bold">DRAW</span>
+        </div>
+      );
     default:
       return <span className="text-4xl font-bold">{value}</span>;
+  }
+};
+
+const getCornerIcon = (value: CardValue) => {
+  switch (value) {
+    case "skip":
+      return <SkipForward className="w-3 h-3" />;
+    case "reverse":
+      return <RotateCcw className="w-3 h-3" />;
+    case "draw2":
+      return <span className="text-xs font-bold">+2</span>;
+    case "wild":
+      return <Palette className="w-3 h-3" />;
+    case "wild-draw4":
+      return <span className="text-xs font-bold">+4</span>;
+    case "flip":
+      return <span className="text-xs font-bold">F</span>;
+    case "draw5":
+      return <span className="text-xs font-bold">+5</span>;
+    case "skip-all":
+      return <span className="text-xs font-bold">SA</span>;
+    case "wild-draw-color":
+      return <span className="text-xs font-bold">WD</span>;
+    default:
+      return <span className="text-xs font-bold">{value}</span>;
   }
 };
 
@@ -121,12 +175,23 @@ export const Card = ({
           className={cn(
             "absolute inset-0 rounded-xl shadow-lg backface-hidden border-4 border-white",
             colorClasses[color],
-            "flex items-center justify-center"
+            "flex items-center justify-center relative"
           )}
           style={{ backfaceVisibility: "hidden" }}
         >
+          {/* Top-left corner */}
+          <div className="absolute top-1 left-1 text-white drop-shadow-lg flex flex-col items-center">
+            {getCornerIcon(value)}
+          </div>
+          
+          {/* Center icon */}
           <div className="text-white drop-shadow-lg flex items-center justify-center">
             {getCardIcon(value)}
+          </div>
+          
+          {/* Bottom-right corner (rotated) */}
+          <div className="absolute bottom-1 right-1 text-white drop-shadow-lg flex flex-col items-center rotate-180">
+            {getCornerIcon(value)}
           </div>
         </div>
 

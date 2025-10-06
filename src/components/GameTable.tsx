@@ -11,6 +11,8 @@ interface GameTableProps {
   rightPlayer: { color: CardColor; value: CardValue }[];
   discardPile: { color: CardColor; value: CardValue };
   onDrawCard?: () => void;
+  currentTurn: number;
+  onTurnEnd?: () => void;
 }
 
 export const GameTable = ({
@@ -20,20 +22,29 @@ export const GameTable = ({
   rightPlayer,
   discardPile,
   onDrawCard,
+  currentTurn,
+  onTurnEnd,
 }: GameTableProps) => {
   const [isDrawPileHovered, setIsDrawPileHovered] = useState(false);
   const [turnTimer, setTurnTimer] = useState(30);
 
   useEffect(() => {
+    setTurnTimer(30); // Reset timer when turn changes
+  }, [currentTurn]);
+
+  useEffect(() => {
     const interval = setInterval(() => {
       setTurnTimer((prev) => {
-        if (prev <= 1) return 30; // Reset timer
+        if (prev <= 1) {
+          onTurnEnd?.();
+          return 30;
+        }
         return prev - 1;
       });
     }, 1000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [onTurnEnd]);
   
   const handleCardPlay = (playerIndex: number, cardIndex: number) => {
     console.log(`Player ${playerIndex} played card ${cardIndex}`);
@@ -58,7 +69,8 @@ export const GameTable = ({
           <PlayerHand 
             cards={topPlayer} 
             position="top" 
-            playerName="Player 2" 
+            playerName="Player 2"
+            isActivePlayer={currentTurn === 1}
           />
         </div>
 
@@ -67,7 +79,8 @@ export const GameTable = ({
           <PlayerHand 
             cards={leftPlayer} 
             position="left" 
-            playerName="Player 3" 
+            playerName="Player 3"
+            isActivePlayer={currentTurn === 2}
           />
         </div>
 
@@ -76,7 +89,8 @@ export const GameTable = ({
           <PlayerHand 
             cards={rightPlayer} 
             position="right" 
-            playerName="Player 4" 
+            playerName="Player 4"
+            isActivePlayer={currentTurn === 3}
           />
         </div>
 
@@ -141,6 +155,7 @@ export const GameTable = ({
             cards={currentPlayer} 
             isCurrentPlayer={true}
             onCardPlay={(cardIndex) => handleCardPlay(0, cardIndex)}
+            isActivePlayer={currentTurn === 0}
           />
         </div>
       </div>
@@ -149,7 +164,9 @@ export const GameTable = ({
       <div className="absolute top-4 right-4 bg-background/20 backdrop-blur-md rounded-lg px-4 py-3 shadow-lg border-2 border-primary/30">
         <div className="flex items-center gap-3">
           <div className="flex flex-col items-center">
-            <div className="text-foreground/70 text-xs font-medium mb-1">Your Turn</div>
+            <div className="text-foreground/70 text-xs font-medium mb-1">
+              {currentTurn === 0 ? "Your Turn" : `Player ${currentTurn + 1}'s Turn`}
+            </div>
             <div className="flex items-center gap-2">
               <Clock className="w-4 h-4 text-primary" />
               <motion.div
